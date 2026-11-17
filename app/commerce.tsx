@@ -257,7 +257,7 @@ const nav = [
   { key: "promotions", label: "Промокоды", icon: TicketPercent },
   { key: "staff", label: "Сотрудники", icon: UserRoundCog },
 ];
-const colors = ["#4169ed", "#8aabfa", "#b9cdfb", "#e4ebfa"];
+const colors = ["#000000", "#666666", "#aaaaaa", "#e6e6e6"];
 const money = (n: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -872,12 +872,6 @@ export default function Commerce() {
                 height="46"
                 aria-hidden="true"
               >
-                <defs>
-                  <linearGradient id={"g" + i} x1="0" y1="0" x2="0" y2="1">
-                    <stop stopColor="#4875ef" stopOpacity=".14" />
-                    <stop offset="1" stopColor="#4875ef" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
                 <path
                   d={
                     "M0,50 " +
@@ -886,13 +880,13 @@ export default function Commerce() {
                       .join(" ") +
                     " L99,50Z"
                   }
-                  fill={`url(#g${i})`}
+                  fill="#e6e6e6"
                 />
                 <polyline
                   points={m.spark
                     .map((v, j) => `${j * 11},${60 - v * 0.7}`)
                     .join(" ")}
-                  stroke="#6086ef"
+                  stroke="#000000"
                   strokeWidth="2"
                   fill="none"
                 />
@@ -946,15 +940,9 @@ export default function Commerce() {
               data={graph}
               margin={{ top: 15, right: 10, left: -15, bottom: 0 }}
             >
-              <defs>
-                <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#4470ef" stopOpacity={0.18} />
-                  <stop offset="95%" stopColor="#4470ef" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid
                 vertical={false}
-                stroke="#eef0f5"
+                stroke="#e6e6e6"
                 strokeDasharray="3 3"
               />
               <XAxis
@@ -962,7 +950,7 @@ export default function Commerce() {
                 axisLine={false}
                 tickLine={false}
                 minTickGap={36}
-                tick={{ fontSize: 11, fill: "#9299a8" }}
+                tick={{ fontSize: 11, fill: "#323232" }}
                 dy={8}
               />
               <YAxis
@@ -975,12 +963,13 @@ export default function Commerce() {
                 }
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "#9299a8" }}
+                tick={{ fontSize: 11, fill: "#323232" }}
               />
               <Tooltip
                 contentStyle={{
-                  borderRadius: 10,
-                  border: "1px solid #edf0f5",
+                  borderRadius: 16,
+                  border: "1px solid #000000",
+                  boxShadow: "none",
                   fontSize: 12,
                 }}
                 formatter={(v) => [
@@ -991,9 +980,9 @@ export default function Commerce() {
               <Area
                 type="monotone"
                 dataKey={chartMode}
-                stroke="#4169ed"
+                stroke="#000000"
                 strokeWidth={2.5}
-                fill="url(#area)"
+                fill="#e6e6e6"
                 activeDot={{ r: 5, strokeWidth: 3, stroke: "white" }}
               />
             </AreaChart>
@@ -2261,6 +2250,7 @@ export default function Commerce() {
                           aria-label={"Добавить в корзину " + p.name}
                           onClick={() => add(p)}
                         >
+                          <span>В корзину</span>
                           <Plus size={19} />
                         </button>
                       </div>
