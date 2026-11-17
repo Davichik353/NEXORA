@@ -1,6 +1,6 @@
 "use client";
 import { changeInventory, discountedTotal } from "../lib/inventory";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   AreaChart,
   Area,
@@ -307,6 +307,8 @@ function ProductPic({ p }: { p: Product }) {
   );
 }
 export default function Commerce() {
+  const [motion, setMotion] = useState(true);
+  const heroVideo = useRef<HTMLVideoElement>(null);
   const [db, setDB] = useState<DB>(seed);
   const [ready, setReady] = useState(false);
   const [page, setPage] = useState("dashboard");
@@ -335,6 +337,54 @@ export default function Commerce() {
   const [orderPage, setOrderPage] = useState(1);
   const [userMenu, setUserMenu] = useState(false);
   const [chartMode, setChartMode] = useState("revenue");
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setMotion(!media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    const video = heroVideo.current;
+    if (!video) return;
+    if (motion && mode === "shop") video.play().catch(() => {});
+    else video.pause();
+  }, [motion, mode, showFavs]);
+  useEffect(() => {
+    if (
+      !ready ||
+      mode !== "shop" ||
+      !motion ||
+      !("IntersectionObserver" in window)
+    )
+      return;
+    const elements = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        ".catalog-heading,.store-product,.community-card,.film-section,.store-bottom-banner,.store-perks",
+      ),
+    );
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).dataset.reveal = "visible";
+            observer.unobserve(entry.target);
+          }
+        }),
+      { threshold: 0.08 },
+    );
+    elements.forEach((element, index) => {
+      element.dataset.reveal = "pending";
+      element.style.setProperty("--reveal-delay", `${(index % 3) * 65}ms`);
+      observer.observe(element);
+    });
+    return () => {
+      observer.disconnect();
+      elements.forEach((element) => {
+        element.dataset.reveal = "visible";
+      });
+    };
+  }, [ready, mode, motion, query, category, sort, showFavs, brand, maxPrice]);
   useEffect(() => {
     try {
       const saved = localStorage.getItem("nexora-db-v1");
@@ -1694,7 +1744,7 @@ export default function Commerce() {
                 </div>
               )}
             </header>
-            <main className="admin-main">
+            <main className="admin-main" key={page}>
               <div className="page-heading">
                 <div>
                   <div className="eyebrow">
@@ -1945,7 +1995,7 @@ export default function Commerce() {
           </div>
         </div>
       ) : (
-        <div className="store-app">
+        <div className={"store-app " + (motion ? "" : "motion-paused")}>
           <div className="store-announcement">
             Технологии, которые вдохновляют.{" "}
             <span>
@@ -2062,21 +2112,42 @@ export default function Commerce() {
                   </span>
                 </div>
                 <div className="hero-image">
-                  <img
-                    src="/assets/macbook.webp"
-                    alt="MacBook Pro — ноутбук Apple"
-                    width="660"
-                    height="470"
-                  />
-                  <span className="hero-product-label">
-                    <small>ДЛЯ ВАШИХ БОЛЬШИХ ИДЕЙ</small>
-                    <b>MacBook Pro 14″</b>
-                    <span>
-                      от $1,999 <ArrowUpRight size={17} />
-                    </span>
-                  </span>
+                  <video
+                    ref={heroVideo}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    poster="/media/loop-poster.jpg"
+                    aria-label="Устройства NEXORA: ноутбук, наушники и смартфон"
+                  >
+                    <source src="/media/nexora-loop.mp4" type="video/mp4" />
+                    Ваш браузер не поддерживает видео.
+                  </video>
                 </div>
+                <button
+                  className="motion-toggle"
+                  onClick={() => setMotion(!motion)}
+                  aria-pressed={!motion}
+                >
+                  {motion ? "Ⅱ Остановить движение" : "▷ Включить движение"}
+                </button>
               </section>
+            )}
+            {!showFavs && (
+              <div
+                className="motion-strip"
+                aria-label="Работа. Творчество. Жизнь."
+              >
+                <div className="motion-track" aria-hidden="true">
+                  {[0, 1].map((i) => (
+                    <span key={i}>
+                      РАБОТА <i>↗</i> ТВОРЧЕСТВО <i>↗</i> ЖИЗНЬ <i>↗</i> NEXORA{" "}
+                      <i>↗</i>
+                    </span>
+                  ))}
+                </div>
+              </div>
             )}
             <div className="store-perks">
               <span>
@@ -2284,6 +2355,124 @@ export default function Commerce() {
                 </div>
               )}
             </section>
+            {!showFavs && (
+              <>
+                <section className="film-section" aria-labelledby="film-title">
+                  <div className="film-intro">
+                    <div>
+                      <span className="eyebrow">NEXORA В ДВИЖЕНИИ / 00:30</span>
+                      <h2 id="film-title">
+                        Один магазин.
+                        <br />
+                        Целая система.
+                      </h2>
+                    </div>
+                    <div>
+                      <p>
+                        От выбора устройства до управления бизнесом. Короткое
+                        знакомство с NEXORA Commerce.
+                      </p>
+                      <a
+                        href="/media/nexora-presentation.mp4"
+                        download="NEXORA-presentation.mp4"
+                        className="btn"
+                      >
+                        Скачать презентацию <Download size={17} />
+                      </a>
+                    </div>
+                  </div>
+                  <video
+                    controls
+                    playsInline
+                    preload="none"
+                    poster="/media/presentation-poster.jpg"
+                    aria-label="Видеопрезентация NEXORA Commerce, 30 секунд, без озвучки"
+                  >
+                    <source
+                      src="/media/nexora-presentation.mp4"
+                      type="video/mp4"
+                    />
+                    <a href="/media/nexora-presentation.mp4">
+                      Скачать видеопрезентацию
+                    </a>
+                  </video>
+                  <p className="film-note">
+                    30 секунд · Без озвучки · Демонстрация возможностей проекта
+                  </p>
+                </section>
+                <section
+                  className="community-section"
+                  aria-labelledby="community-title"
+                >
+                  <div className="community-heading">
+                    <span className="eyebrow">ТЕХНОЛОГИИ ОБЪЕДИНЯЮТ</span>
+                    <h2 id="community-title">
+                      Для людей.
+                      <br />
+                      Для ваших идей.
+                    </h2>
+                    <p>
+                      У каждого свой ритм. Найдите технику, которая его
+                      поддержит.
+                    </p>
+                  </div>
+                  <div className="community-grid">
+                    {[
+                      {
+                        image: "community-work",
+                        title: "Работать вместе.",
+                        copy: "От первой идеи до большого проекта.",
+                        category: "Ноутбуки",
+                      },
+                      {
+                        image: "community-create",
+                        title: "Создавать новое.",
+                        copy: "Звук, который помогает сосредоточиться.",
+                        category: "Аудио",
+                      },
+                      {
+                        image: "community-life",
+                        title: "Быть ближе.",
+                        copy: "Сохраняйте моменты, которые важны.",
+                        category: "Смартфоны",
+                      },
+                    ].map((item) => (
+                      <article className="community-card" key={item.image}>
+                        <img
+                          src={"/assets/" + item.image + ".jpg"}
+                          alt={item.title}
+                          width="600"
+                          height="750"
+                          loading="lazy"
+                        />
+                        <div>
+                          <h3>{item.title}</h3>
+                          <p>{item.copy}</p>
+                          <button
+                            className="text-btn"
+                            onClick={() => {
+                              setCategory(item.category);
+                              document
+                                .getElementById("catalog")
+                                ?.scrollIntoView({
+                                  behavior: motion ? "smooth" : "auto",
+                                });
+                            }}
+                          >
+                            Найти своё <ArrowUpRight size={17} />
+                          </button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                  <p className="community-note">
+                    Демонстрационные фотографии сообщества из Unsplash.
+                    Изображённые люди не являются подтверждёнными клиентами
+                    NEXORA.
+                  </p>
+                </section>
+              </>
+            )}
             <section className="store-bottom-banner">
               <span className="brand-mark">N</span>
               <div>

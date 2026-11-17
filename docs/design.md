@@ -12,3 +12,8 @@ Decisions:
 - Product assets: existing legitimate Unsplash photography; grayscale only the hero for readable lime copy, preserve color in catalogue imagery.
 
 QA target: source screenshot and this lock. Browser preview previously failed due to infrastructure; retry supported preview once and report if still unavailable. Typecheck/build required. Inventory behavior unchanged.
+
+## Motion and media update
+Hero: 12s silent product-photo film, desaturated behind the existing lime heading. Separate 30s captioned product/CRM overview with native controls and a direct MP4 download. No borrowed TWOTWO video or fabricated customer endorsements.
+Community: three stock-photo editorial cards, explicitly labelled as demo photography.
+Motion: 650ms staggered IntersectionObserver reveal, 600ms photo hover, 300ms workspace entry, pausable ticker and background film. Progressive enhancement leaves content visible without observer support. Reduced-motion disables automatic motion; play() rejection is handled with the poster retained.
